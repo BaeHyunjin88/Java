@@ -1,0 +1,164 @@
+package 김밥천국;
+
+import java.util.InputMismatchException;
+import java.util.Scanner;
+
+public class 김밥천국2 {
+	static Scanner sc = new Scanner(System.in);
+	
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		// 얼마 가지고 있니? 10000원
+				// =====================
+				// 1. 김밥 (2500)
+				// 2. 라면 (3000)
+				// 3. 떡볶이 (4000)
+				// 4. 돈까스 (5000)
+				// 5. 종료
+				// =====================
+				//
+				// 메뉴 주문 번호: 1
+				// 김밥 선택하셨습니다.
+				// 잔돈은 7500원입니다.
+				//
+				// 메뉴 주문 번호: 2
+				// 라면 선택하셨습니다.
+				// 잔돈은 4500원입니다.
+				//
+				// 메뉴 주문 번호: 5
+				// 종료!
+				// 잔돈은 4500원입니다.
+				//
+				// 조건
+				// 1) 만약 본인이 가진 돈보다 비싼 메뉴를 골랐을 경우
+				// 돈이 부족합니다! 라는 메시지를 출력 -> 다시 메뉴 선택
+				// 2) 잔돈이 0이면 종료
+				// 3) (추가) 만약 가진 돈이 메뉴 가격의 최솟값보다 작으면 시작할 수 없음 (**)
+				// 4) 가진 돈이 유효하지 않은 데이터일 수도 있음 (그럴 경우 다시 입력받게)
+				// 5) 1 ~ 5 사이 메뉴를 입력하지 않았을 경우 오류 출력
+		
+		String[] mainmenu = {"김밥", "라면", "떡볶이", "돈까스"};
+		int[] price = {2500, 3000, 4000, 5000};
+		int change = getCurChange(price); // 가진돈 입력하기
+		
+		while (true) {
+			int res = displayMenu(mainmenu, price); // 메뉴 보여주기
+			if( res == -1) {
+				break;
+			}
+			else {
+				change = menu(mainmenu, change, price);
+				if( change == -1)
+					break;
+			}
+			
+		}
+
+		
+	}
+	public static boolean isLowerchange (int change, int[] price) {
+		int min = getMinArray(price);
+		return change < min; // 1000 < 2500
+	}
+	
+	public static int menu (String[] mainmenu, int change, int[] price) {
+		int choice = getMenunumber(mainmenu);
+		if ( choice == 5 ) {
+			System.out.printf("종료!\n");
+			System.out.printf("잔돈은 %d입니다.", change);
+		return -1;
+		}
+		
+		if( canBuymenu(change, choice, price) ) {
+			change = change - price[choice-1];
+		System.out.printf("메뉴 주문번호 : %d.\n", choice);
+		System.out.printf("%s(을/를) 선택하셨습니다. \n", mainmenu[choice-1]);
+		System.out.printf("잔돈은 %d입니다. \n", change );
+		}
+		else { 
+			System.out.println("선택하신 금액보다 잔돈이 적습니다.");
+			System.out.printf("현재 잔돈은 %d입니다.\n", change);
+		}
+		
+		if ( isLowerchange (change, price)){
+			System.out.println("잔돈이 부족하여 추가 주문이 어렵습니다.");
+			System.out.println("주문을 종료하겠습니다.");
+			return -1;
+		}
+		return change;
+	}
+	
+	public static boolean canBuymenu(int change, int choice, int[] price) {
+		return change >= price[choice-1]; // true  false: 1000 < 2500 1) 만약 본인이 가진 돈보다 비싼 메뉴를 골랐을 경우
+	}
+	
+	public static int displayMenu(String[] mainmenu, int[] price) {
+		if( mainmenu.length !=  price.length) {
+			return -1;
+		}
+		System.out.println("===============");
+			int i = 0;
+			for(i = 0; i < mainmenu.length; i++) {
+			 System.out.printf("%d. %s (%d)\n", i + 1, mainmenu[i], price[i]);
+			}
+			System.out.printf("%d.  종료\n", i + 1);
+			System.out.println("===============");
+			return 1;
+	}
+	
+	public static int getMenunumber(String[] mainmenu) {		
+		while(true) {
+		System.out.println("주문하실 메뉴를 선택하세요");
+		int choice = sc.nextInt();
+		
+		if( choice > mainmenu.length+1) {   // 5) 1 ~ 5 사이 메뉴를 입력하지 않았을 때 오류출력
+			System.out.println("메뉴를 다시 선택하세요.");
+			continue;
+		}	
+
+		return choice;
+		
+		
+		}
+	}	
+		
+	public static int getMinArray(int[] price) {
+		int mininumPrice = price[0]; // 2500
+		for(int i = 1; i < price.length; i++) { // 3000, 4000, 5000
+			 if (mininumPrice > price[i]) mininumPrice = price[i]; 
+		}
+		return mininumPrice;
+	}
+	
+	
+	public static int getCurChange(int[] price) {
+		while(true) {
+		try {
+		System.out.println("얼마를 가지고 있습니까?");
+		int change = sc.nextInt();
+		if (change < 0) throw new NegativeNumberException();
+		int getMinPrice = getMinArray(price);
+		if( getMinPrice > change) throw new InvalidNumberRangeException(); // 3) 최소값보다 작으면 주문시작안됨
+			return change;
+		} catch (InputMismatchException e) { // 4) 가진 돈이 유효하지 않을때 다시 입력
+			sc.next(); // 버퍼에 있는 문자를 지움
+			System.out.println(e);
+			System.out.println("[ERROR] 숫자만 입력해주세요 !");
+		} catch (NegativeNumberException e ) {
+			System.out.println(e);
+			System.out.println("[error]음수는 불가능합니다.");
+		} catch (InvalidNumberRangeException e) {
+			System.out.println(e);
+			System.out.println("[error]돈이 부족합니다.");
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+		}
+	}
+		
+		
+
+	
+
+
+}
